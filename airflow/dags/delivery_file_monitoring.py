@@ -4,12 +4,13 @@ from airflow.models import Variable
 from datetime import datetime, timedelta
 
 from airflow.operators.python_operator import PythonOperator
+from airflow.utils.dates import days_ago
 
 VALIDATION_TIMEFRAME = 10 * 60
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime.now()-timedelta(minutes=2),
+    'start_date': days_ago(0, hour=1),
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
