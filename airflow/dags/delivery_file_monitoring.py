@@ -9,17 +9,16 @@ VALIDATION_TIMEFRAME = 10 * 60
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime.now(),
+    'start_date': datetime.now()-timedelta(minutes=2),
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retries': 0
 }
 
 dag = DAG('delivery_file_monitoring',
           default_args=default_args,
-          schedule_interval=timedelta(minutes=5))
+          schedule_interval="*/5 * * * *")
 
 
 def file_watcher_command():
