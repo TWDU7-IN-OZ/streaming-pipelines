@@ -1,5 +1,6 @@
 package com.tw.apps
 
+import com.tw.apps.StationValidation.getInvalidRows
 import org.apache.spark.sql.SparkSession
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
@@ -37,6 +38,8 @@ object StationValidatorApp {
 
     val stationDF = spark.read.csv(dataLocation)
     print(stationDF.first())
+
+    val invalidRows = getInvalidRows(stationDF, spark)
 
   }
 }
