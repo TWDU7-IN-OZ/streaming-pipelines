@@ -55,4 +55,11 @@ object StationDataTransformation {
     jsonDF.select(from_json($"raw_payload", ScalaReflection.schemaFor[StationData].dataType) as "status")
       .select($"status.*")
   }
+
+
+  def formatDate(value: DataFrame): DataFrame = {
+    value.withColumnRenamed("last_updated", "last_updated_epoch")
+      .withColumn("last_updated", from_unixtime(col("last_updated_epoch"), "yyyy-MM-dd'T'hh:mm:ss"))
+  };
+
 }
