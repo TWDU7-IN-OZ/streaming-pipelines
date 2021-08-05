@@ -175,3 +175,7 @@ nohup spark-submit --master yarn --deploy-mode cluster --class com.tw.apps.Stati
 
 echo "====Station Consumers Deployed===="
 EOF
+
+echo "==============Copy Airflow Dags to Airflow EC2 Instance================"
+scp airflow/dags/*.py airflow.${TRAINING_COHORT}.training:/home/ec2-user/airflow/dags/
+echo "==============Copied Airflow Dags to Airflow EC2 Instance================"
