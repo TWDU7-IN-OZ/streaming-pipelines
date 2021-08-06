@@ -7,7 +7,7 @@
  
 ### Steps
 * Run `poetry install`
-* Run `pipenv -m pytest test`
+* Run `poetry -m pytest test`
 
 ### Setup IntelliJ
 
