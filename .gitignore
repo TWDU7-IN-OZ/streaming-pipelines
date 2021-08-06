@@ -32,3 +32,8 @@ target/
 metastore_db/
 
 *.log
+
+.pytest_cache
+__pycache__
+
+.bsp
