@@ -8,3 +8,8 @@ Make sure you have sbt installed.
 Make sure you have docker installed.
 
 Run `./sbin/buildAndRunLocal.sh` to create Docker containers for running and testing this setup on your local machine
+
+Run `./sbin/runAirlfowTests.sh` to run airflow tests (requires `poetry` to be installed, check README of `airflow` folder)
+
+
+
