@@ -62,5 +62,8 @@ $zk_command create /tw/output/dataLocation /tmp/tw/stationMart/data
 $zk_command create /tw/output/invalidDataCheckpointLocation /tmp/tw/stationMart/invalidDataCheckpoints
 $zk_command create /tw/output/invalidDataLocation /tmp/tw/stationMart/invalidData
 
+$zk_command create /tw/output/validDataCheckpointLocation /tmp/tw/stationMart/validDataCheckpoints
+$zk_command create /tw/output/validDataLocation /tmp/tw/stationMart/validData
+
 
 tail -f /dev/null

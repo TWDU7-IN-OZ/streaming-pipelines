@@ -190,19 +190,5 @@ services:
       - streaming-data-internal
     restart: on-failure
 
-  station-validator:
-    build:
-      context: ../StationValidator
-    depends_on:
-      - zookeeper-seed
-      - hadoop-seed
-      - kafka
-    volumes:
-      - ~/.ivy2:/root/.ivy2:rw
-    command: ["./wait-for.sh", "zookeeper:2181", "-t", "30"]
-    networks:
-      - streaming-data-internal
-    restart: on-failure
-
 networks:
   streaming-data-internal:

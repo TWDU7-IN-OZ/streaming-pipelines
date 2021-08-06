@@ -28,7 +28,19 @@ object StationApp {
     val outputLocation = new String(
       zkClient.getData.watched.forPath("/tw/output/dataLocation"))
 
-    val spark = SparkSession.builder
+    val invalidDataLocation = new String(
+      zkClient.getData.watched.forPath(s"/tw/output/invalidDataLocation"))
+
+    val invalidDataCheckpointLocation = new String(
+      zkClient.getData.watched.forPath(s"/tw/output/invalidDataCheckpointLocation"))
+
+    val validDataLocation = new String(
+      zkClient.getData.watched.forPath(s"/tw/output/validDataLocation"))
+
+    val validDataCheckpointLocation = new String(
+      zkClient.getData.watched.forPath(s"/tw/output/validDataCheckpointLocation"))
+
+    implicit val spark = SparkSession.builder
       .appName("StationConsumer")
       .getOrCreate()
     spark.conf.set("spark.sql.session.timeZone", "UTC");
@@ -55,9 +67,31 @@ object StationApp {
       .selectExpr("CAST(value AS STRING) as raw_payload")
       .transform(sfStationStatusJson2DF(_, spark))
 
-    nycStationDF
-      .union(sfStationDF)
-      .as[StationData]
+    val rawStationData = nycStationDF.union(sfStationDF).as[StationData]
+
+    rawStationData
+      .writeStream
+      .format("overwriteCSV")
+      .outputMode("append")
+      .option("header", true)
+      .option("truncate", false)
+      .option("checkpointLocation", checkpointLocation)
+      .option("path", outputLocation)
+      .start()
+      .awaitTermination()
+
+    StationValidation.getInValidData(rawStationData.toDF())
+      .writeStream
+      .format("overwriteCSV")
+      .outputMode("append")
+      .option("header", true)
+      .option("truncate", false)
+      .option("checkpointLocation", invalidDataCheckpointLocation)
+      .option("path", invalidDataLocation)
+      .start()
+      .awaitTermination()
+
+      StationValidation.getValidData(rawStationData)
       .groupByKey(r=>r.station_id)
       .reduceGroups((r1,r2)=>if (r1.last_updated > r2.last_updated) r1 else r2)
       .map(_._2)
@@ -65,11 +99,11 @@ object StationApp {
       .transform(formatDate(_))
       .writeStream
       .format("overwriteCSV")
-      .outputMode("complete")
+      .outputMode("update")
       .option("header", true)
       .option("truncate", false)
-      .option("checkpointLocation", checkpointLocation)
-      .option("path", outputLocation)
+      .option("checkpointLocation", validDataCheckpointLocation)
+      .option("path", validDataLocation)
       .start()
       .awaitTermination()
 

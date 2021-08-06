@@ -37,3 +37,6 @@ $zk_command create /tw/output/dataLocation hdfs://$hdfs_server/tw/stationMart/da
 
 $zk_command create /tw/output/invalidDataCheckpointLocation hdfs://$hdfs_server/tw/stationMart/invalidDataCheckpoints
 $zk_command create /tw/output/invalidDataLocation hdfs://$hdfs_server/tw/stationMart/invalidData
+
+$zk_command create /tw/output/validDataCheckpointLocation hdfs://$hdfs_server/tw/stationMart/validDataCheckpoints
+$zk_command create /tw/output/validDataLocation hdfs://$hdfs_server/tw/stationMart/validData
