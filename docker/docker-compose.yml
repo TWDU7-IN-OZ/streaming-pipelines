@@ -98,6 +98,17 @@ services:
     environment:
       - PROFILE_NAME=station-france
 
+  station-nyc-producer:
+    build:
+      context: ../CitibikeApiProducer
+      dockerfile: Dockerfile-station-nyc-v2
+    depends_on:
+      - kafka
+      - zookeeper-seed
+    networks:
+      - streaming-data-internal
+    restart: on-failure
+
   raw-station-information-data-saver:
     build:
       context: ../RawDataSaver

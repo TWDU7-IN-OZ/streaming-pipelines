@@ -78,6 +78,7 @@ station_information="station-information"
 station_status="station-status"
 station_san_francisco="station-san-francisco"
 station_france="station-france"
+station_nyc="station-nyc-v2"
 
 
 echo "====Kill running producers===="
@@ -86,6 +87,7 @@ kill_process \${station_information}
 kill_process \${station_status}
 kill_process \${station_san_francisco}
 kill_process \${station_france}
+kill_process \${station-nyc}
 
 echo "====Runing Producers Killed===="
 
@@ -94,6 +96,7 @@ nohup java -jar /tmp/tw-citibike-apis-producer0.1.0.jar --spring.profiles.active
 nohup java -jar /tmp/tw-citibike-apis-producer0.1.0.jar --spring.profiles.active=\${station_san_francisco} --producer.topic=station_data_sf --kafka.brokers=kafka.${TRAINING_COHORT}.training:9092 1>/tmp/\${station_san_francisco}.log 2>/tmp/\${station_san_francisco}.error.log &
 nohup java -jar /tmp/tw-citibike-apis-producer0.1.0.jar --spring.profiles.active=\${station_france} --producer.topic=station_data_france --kafka.brokers=kafka.${TRAINING_COHORT}.training:9092 1>/tmp/\${station_france}.log 2>/tmp/\${station_france}.error.log &
 nohup java -jar /tmp/tw-citibike-apis-producer0.1.0.jar --spring.profiles.active=\${station_status} --kafka.brokers=kafka.${TRAINING_COHORT}.training:9092 1>/tmp/\${station_status}.log 2>/tmp/\${station_status}.error.log &
+nohup java -jar /tmp/tw-citibike-apis-producer0.1.0.jar --spring.profiles.active=\${station_nyc} --producer.topic=station_data_nyc_v2 --kafka.brokers=kafka.${TRAINING_COHORT}.training:9092 1>/tmp/\${station_nyc}.log 2>/tmp/\${station_nyc}.error.log &
 
 echo "====Producers Deployed===="
 EOF
