@@ -160,6 +160,23 @@ services:
       - streaming-data-internal
     restart: on-failure
 
+  raw-station-data-nyc-saver:
+    build:
+      context: ../RawDataSaver
+      dockerfile: Dockerfile-station-data-nyc-v2
+    depends_on:
+      - kafka
+      - station-information-producer
+      - station-status-producer
+      - station-nyc-producer
+      - hadoop-seed
+      - zookeeper-seed
+    volumes:
+      - ~/.ivy2:/root/.ivy2:rw
+    networks:
+      - streaming-data-internal
+    restart: on-failure
+
   station-consumer:
     build:
       context: ../StationConsumer
