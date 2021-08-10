@@ -1,16 +1,17 @@
 package com.tw.apps
 
-import StationDataTransformation.{formatDate, nycStationStatusJson2DF}
-import org.apache.spark.sql.{Row, SparkSession}
+import com.tw.apps.StationDataTransformation.{formatDate, nycStationStatusJson2DF}
 import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.functions.from_json
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest._
 
 class StationDataTransformationTest extends FeatureSpec with Matchers with GivenWhenThen {
 
   feature("Apply station status transformations to data frame") {
-    val spark = SparkSession.builder.appName("Test App").master("local").getOrCreate()
-    spark.conf.set("spark.sql.session.timeZone", "UTC");
+    implicit val spark: SparkSession = SparkSession.builder.appName("Test App").master("local").getOrCreate()
+    spark.conf.set("spark.sql.session.timeZone", "UTC")
     import spark.implicits._
 
     scenario("Transform nyc station data frame") {
@@ -82,7 +83,7 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
 
 
       When("Transformations are applied")
-      val resultDF1 = testDF1.transform(formatDate(_))
+      val resultDF1 = testDF1.transform(formatDate)
 
       Then("Useful columns are extracted")
       resultDF1.schema.fields(0).name should be("last_updated_epoch")
@@ -92,6 +93,51 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
 
       row1.get(0) should be(1536242527)
       row1.get(1) should be("2018-09-06T02:02:07")
+    }
+
+    scenario("Validate and Reduce data") {
+      val testStationData =
+        """{
+          "station_id":"83",
+          "bikes_available":19,
+          "docks_available":41,
+          "is_renting":true,
+          "is_returning":true,
+          "last_updated":1536242527,
+          "name":"Atlantic Ave & Fort Greene Pl",
+          "latitude":40.68382604,
+          "longitude":-73.97632328
+          }
+        """
+      val testStationData1 =
+        """{
+          |"station_id":"83",
+          |          "bikes_available":10,
+          |          "docks_available":25,
+          |          "is_renting":true,
+          |          "is_returning":true,
+          |          "last_updated":1536242528,
+          |          "name":"Atlantic Ave & Fort Greene Pl",
+          |          "latitude":40.68382604,
+          |          "longitude":-73.97632328
+          |}
+        """.stripMargin
+
+      val testDF1: Dataset[StationData] = spark.read.json(Seq(testStationData, testStationData1).toDS())
+        .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
+        .withColumn("docks_available", col("docks_available").cast(IntegerType))
+        .as[StationData]
+
+      val expectedData: Dataset[ValidatedStationData] = spark.read.json(Seq(testStationData1).toDS())
+        .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
+        .withColumn("docks_available", col("docks_available").cast(IntegerType))
+        .withColumn("is_valid", lit(true))
+        .as[ValidatedStationData]
+
+      val validatedData: Dataset[ValidatedStationData] = StationDataTransformation.validateAndReduce(testDF1)
+      validatedData.collect().length should be(1)
+
+      expectedData.head() shouldBe validatedData.head()
     }
   }
 }

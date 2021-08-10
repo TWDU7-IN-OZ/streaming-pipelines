@@ -1,6 +1,6 @@
 package com.tw.apps
 
-import StationDataTransformation._
+import com.tw.apps.StationDataTransformation._
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.spark.sql.SparkSession
@@ -40,10 +40,10 @@ object StationApp {
     val validDataCheckpointLocation = new String(
       zkClient.getData.watched.forPath(s"/tw/output/validDataCheckpointLocation"))
 
-    implicit val spark = SparkSession.builder
+    implicit val spark: SparkSession = SparkSession.builder
       .appName("StationConsumer")
       .getOrCreate()
-    spark.conf.set("spark.sql.session.timeZone", "UTC");
+    spark.conf.set("spark.sql.session.timeZone", "UTC")
 
     import spark.implicits._
 
@@ -52,7 +52,7 @@ object StationApp {
       .option("kafka.bootstrap.servers", stationKafkaBrokers)
       .option("subscribe", nycStationTopic)
       .option("startingOffsets", "latest")
-      .option("failOnDataLoss", false)
+      .option("failOnDataLoss", value = false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
       .transform(nycStationStatusJson2DF(_, spark))
@@ -62,50 +62,24 @@ object StationApp {
       .option("kafka.bootstrap.servers", stationKafkaBrokers)
       .option("subscribe", sfStationTopic)
       .option("startingOffsets", "latest")
-      .option("failOnDataLoss", false)
+      .option("failOnDataLoss", value = false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
       .transform(sfStationStatusJson2DF(_, spark))
 
     val rawStationData = nycStationDF.union(sfStationDF).as[StationData]
 
-    rawStationData
-      .writeStream
-      .format("overwriteCSV")
-      .outputMode("append")
-      .option("header", true)
-      .option("truncate", false)
-      .option("checkpointLocation", checkpointLocation)
-      .option("path", outputLocation)
-      .start()
-      .awaitTermination()
-
-    StationValidation.getInValidData(rawStationData.toDF())
-      .writeStream
-      .format("overwriteCSV")
-      .outputMode("append")
-      .option("header", true)
-      .option("truncate", false)
-      .option("checkpointLocation", invalidDataCheckpointLocation)
-      .option("path", invalidDataLocation)
-      .start()
-      .awaitTermination()
-
-      StationValidation.getValidData(rawStationData)
-      .groupByKey(r=>r.station_id)
-      .reduceGroups((r1,r2)=>if (r1.last_updated > r2.last_updated) r1 else r2)
-      .map(_._2)
+    validateAndReduce(rawStationData)
       .toDF()
-      .transform(formatDate(_))
+      .transform(formatDate)
       .writeStream
       .format("overwriteCSV")
       .outputMode("update")
-      .option("header", true)
-      .option("truncate", false)
+      .option("header", value = true)
+      .option("truncate", value = false)
       .option("checkpointLocation", validDataCheckpointLocation)
       .option("path", validDataLocation)
       .start()
       .awaitTermination()
-
   }
 }

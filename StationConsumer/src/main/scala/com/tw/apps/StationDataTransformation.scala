@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{udf, _}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, SparkSession}
 
 import scala.util.parsing.json.JSON
 
@@ -60,6 +60,26 @@ object StationDataTransformation {
   def formatDate(value: DataFrame): DataFrame = {
     value.withColumnRenamed("last_updated", "last_updated_epoch")
       .withColumn("last_updated", from_unixtime(col("last_updated_epoch"), "yyyy-MM-dd'T'hh:mm:ss"))
-  };
+  }
 
+  def validateAndReduce(rawStationData: Dataset[StationData])(implicit spark: SparkSession): Dataset[ValidatedStationData] = {
+    import spark.implicits._
+    rawStationData
+      .withColumn("is_valid", validateFields).as[ValidatedStationData]
+      .groupByKey(r => (r.station_id, r.is_valid))
+      .reduceGroups((r1, r2) => if (r1.last_updated > r2.last_updated) r1 else r2)
+      .map(_._2)
+  }
+
+  private def validateFields = {
+
+    when(isPositiveInteger("docks_available") &&
+      isPositiveInteger("bikes_available") &&
+      col("latitude").isNotNull && col("longitude").isNotNull, lit(true))
+      .otherwise(lit(false))
+  }
+
+  private def isPositiveInteger(columnName: String): Column = {
+    col(columnName) >= 0
+  }
 }
