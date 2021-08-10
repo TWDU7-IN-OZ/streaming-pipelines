@@ -22,6 +22,63 @@ jobs:
                 key: python-dependencies-{{ checksum "./airflow/poetry.lock" }}
                 paths:
                   - /home/circleci/.cache/pypoetry/virtualenvs
+
+    raw-data-saver-test:
+        <<: *defaults
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - scala-dependencies-{{ checksum "./RawDataSaver/build.sbt" }}
+            - run:
+                command: cd RawDataSaver && sbt test
+            - save_cache:
+                key: scala-dependencies-{{ checksum "./RawDataSaver/build.sbt" }}
+                paths:
+                    - "~/.ivy2/cache"
+
+    station-consumer-test:
+        <<: *defaults
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - scala-dependencies-{{ checksum "./StationConsumer/build.sbt" }}
+            - run:
+                command: cd StationConsumer && sbt test
+            - save_cache:
+                key: scala-dependencies-{{ checksum "./StationConsumer/build.sbt" }}
+                paths:
+                    - "~/.ivy2/cache"
+
+    station-transformer-nyc-test:
+        <<: *defaults
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - scala-dependencies-{{ checksum "./StationTransformerNYC/build.sbt" }}
+            - run:
+                command: cd StationTransformerNYC && sbt test
+            - save_cache:
+                key: scala-dependencies-{{ checksum "./StationTransformerNYC/build.sbt" }}
+                paths:
+                    - "~/.ivy2/cache"
+
+    citibike-api-producer-test:
+        <<: *defaults
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - java-dependencies-{{ checksum "./CitibikeApiProducer/build.gradle" }}
+            - run:
+                command: cd CitibikeApiProducer && ./gradlew test
+            - save_cache:
+                key: java-dependencies-{{ checksum "./CitibikeApiProducer/build.gradle" }}
+                paths:
+                    - "~/.gradle"
+
     build:
         <<: *defaults
         steps:
@@ -69,6 +126,10 @@ workflows:
     build_and_deploy:
         jobs:
             - airflow-tests
+            - raw-data-saver-test
+            - station-consumer-test
+            - station-transformer-nyc-test
+            - citibike-api-producer-test
             - build
             - approve-deploy:
                 type: approval
