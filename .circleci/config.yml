@@ -130,7 +130,12 @@ workflows:
             - station-consumer-test
             - station-transformer-nyc-test
             - citibike-api-producer-test
-            - build
+            - build:
+                requires:
+                    - raw-data-saver-test
+                    - station-consumer-test
+                    - station-transformer-nyc-test
+                    - citibike-api-producer-test
             - approve-deploy:
                 type: approval
                 filters:
