@@ -70,7 +70,7 @@ object StationDataTransformation {
   }
 
   def sfStationStatusJson2DF(jsonDF: DataFrame, spark: SparkSession): DataFrame = {
-    val toStatusFn: UserDefinedFunction = udf(SFStationStatus)
+    val toStatusFn: UserDefinedFunction = udf(SFToStationStatus)
 
     import spark.implicits._
 
@@ -79,7 +79,7 @@ object StationDataTransformation {
   }
 
   def franceStationStatusJson2DF(jsonDF: DataFrame, spark: SparkSession): DataFrame = {
-    val toStatusFn: UserDefinedFunction = udf(franceStationStatus)
+    val toStatusFn: UserDefinedFunction = udf(franceToStationStatus)
 
     import spark.implicits._
 
