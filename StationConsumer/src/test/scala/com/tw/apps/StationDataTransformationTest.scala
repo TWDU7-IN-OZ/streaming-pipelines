@@ -95,7 +95,7 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
       row1.get(1) should be("2018-09-06T02:02:07")
     }
 
-    scenario("Validate and Reduce data") {
+    scenario("reduce valid data") {
       val testStationData =
         """{
           "station_id":"83",
@@ -138,6 +138,68 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
       validatedData.collect().length should be(1)
 
       expectedData.head() shouldBe validatedData.head()
+    }
+
+    scenario("do not reduce invalid data") {
+
+      val validtestStationData1 =
+        """{
+          |"station_id":"83",
+          |"bikes_available":10,
+          |"docks_available":25,
+          |"is_renting":true,
+          |"is_returning":true,
+          |"last_updated":1536242527,
+          |"name":"Atlantic Ave & Fort Greene Pl",
+          |"latitude":40.68382604,
+          |"longitude":-73.97632328
+          |}
+        """.stripMargin
+
+      val invalidtestStationData =
+        """{
+          "station_id":"83",
+          "bikes_available":-19,
+          "docks_available":41,
+          "is_renting":true,
+          "is_returning":true,
+          "last_updated":1536242528,
+          "name":"Atlantic Ave & Fort Greene Pl",
+          "latitude":40.68382604,
+          "longitude":-73.97632328
+          }
+        """
+      val invalidtestStationData2 =
+        """{
+          |"station_id":"83",
+          |"bikes_available":10,
+          |"docks_available":-25,
+          |"is_renting":true,
+          |"is_returning":true,
+          |"last_updated":1536242530,
+          |"name":"Atlantic Ave & Fort Greene Pl",
+          |"latitude":40.68382604,
+          |"longitude":-73.97632328
+          |}
+        """.stripMargin
+
+      val testDF1: Dataset[StationData] = spark.read.json(Seq(validtestStationData1, invalidtestStationData,invalidtestStationData2).toDS())
+        .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
+        .withColumn("docks_available", col("docks_available").cast(IntegerType))
+        .as[StationData]
+
+
+//      val expectedData: Dataset[ValidatedStationData] = spark.read.json(Seq(testStationData1).toDS())
+//        .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
+//        .withColumn("docks_available", col("docks_available").cast(IntegerType))
+//        .withColumn("is_valid", lit(true))
+//        .as[ValidatedStationData]
+
+      val validatedData: Dataset[ValidatedStationData] = StationDataTransformation.validateAndReduce(testDF1)
+      validatedData.show(false)
+//      validatedData.collect().length should be(1)
+//
+//      expectedData.head() shouldBe validatedData.head()
     }
   }
 }

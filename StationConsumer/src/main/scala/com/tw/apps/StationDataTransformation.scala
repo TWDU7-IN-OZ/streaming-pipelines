@@ -71,15 +71,19 @@ object StationDataTransformation {
       .map(_._2)
   }
 
-  private def validateFields = {
+  private def validateFields: Column = {
 
     when(isPositiveInteger("docks_available") &&
       isPositiveInteger("bikes_available") &&
-      col("latitude").isNotNull && col("longitude").isNotNull, lit(true))
+      isNonNull("latitude") && isNonNull("longitude"), lit(true))
       .otherwise(lit(false))
   }
 
   private def isPositiveInteger(columnName: String): Column = {
     col(columnName) >= 0
+  }
+
+  private def isNonNull(colName: String): Column = {
+    col(colName).isNotNull
   }
 }
