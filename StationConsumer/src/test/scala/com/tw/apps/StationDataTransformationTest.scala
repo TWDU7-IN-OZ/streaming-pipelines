@@ -1,6 +1,6 @@
 package com.tw.apps
 
-import com.tw.apps.StationDataTransformation.{formatDate, nycStationStatusJson2DF}
+import com.tw.apps.StationDataTransformation.{formatDate, nycStationStatusJson2DF, sfStationStatusJson2DF}
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
@@ -68,6 +68,76 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
       row1.get(6) should be("Atlantic Ave & Fort Greene Pl")
       row1.get(7) should be(40.68382604)
       row1.get(8) should be(-73.97632328)
+    }
+
+    scenario("Transform sf station data frame") {
+
+      val testStationData =
+        """{
+          "payload":
+          {
+          "network":{
+          "stations":[{
+	        "empty_slots": 4,
+	        "extra": {
+	        	"address": null,
+	        	"last_updated": 1602187490,
+	        	"renting": 1,
+	        	"returning": 1,
+	        	"uid": "340"
+	        },
+          	"free_bikes": 11,
+          	"id": "d0e8f4f1834b7b33a3faf8882f567ab8",
+
+          	"longitude": -122.270582,
+          	"name": "Harmon St at Adeline St",
+          	"timestamp": "2020-10-08T21:02:33.968000Z"
+          }]
+          }
+          }
+          }"""
+
+      val schema = ScalaReflection.schemaFor[StationData].dataType //.asInstanceOf[StructType]
+
+      Given("Sample data for station_status")
+      val testDF1 = Seq(testStationData).toDF("raw_payload")
+      testDF1.show(false)
+
+
+      When("Transformations are applied")
+      val resultDF1 = testDF1.transform(sfStationStatusJson2DF(_, spark))
+      resultDF1.show(false)
+
+      Then("Useful columns are extracted")
+      resultDF1.schema.fields(0).name should be("bikes_available")
+      resultDF1.schema.fields(0).dataType.typeName should be("integer")
+      resultDF1.schema.fields(1).name should be("docks_available")
+      resultDF1.schema.fields(1).dataType.typeName should be("integer")
+      resultDF1.schema.fields(2).name should be("is_renting")
+      resultDF1.schema.fields(2).dataType.typeName should be("boolean")
+      resultDF1.schema.fields(3).name should be("is_returning")
+      resultDF1.schema.fields(3).dataType.typeName should be("boolean")
+      resultDF1.schema.fields(4).name should be("last_updated")
+      resultDF1.schema.fields(4).dataType.typeName should be("long")
+      resultDF1.schema.fields(5).name should be("station_id")
+      resultDF1.schema.fields(5).dataType.typeName should be("string")
+      resultDF1.schema.fields(6).name should be("name")
+      resultDF1.schema.fields(6).dataType.typeName should be("string")
+      resultDF1.schema.fields(7).name should be("latitude")
+      resultDF1.schema.fields(7).dataType.typeName should be("double")
+      resultDF1.schema.fields(8).name should be("longitude")
+      resultDF1.schema.fields(8).dataType.typeName should be("double")
+
+      val row1 = resultDF1.head()
+      row1.get(0) should be(11)
+      row1.get(1) should be(4)
+      row1.get(2) shouldBe true
+      row1.get(3) shouldBe true
+      row1.get(4) should be(1602190953)
+      row1.get(5) should be("d0e8f4f1834b7b33a3faf8882f567ab8")
+      row1.get(6) should be("Harmon St at Adeline St")
+      row1.get(7) should be null
+      row1.get(8) should be(-122.270582)
     }
 
     scenario("Transform last updated") {

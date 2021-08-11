@@ -26,6 +26,8 @@ object StationDataTransformation {
 
     stations.asInstanceOf[Seq[Map[String, Any]]]
       .map(x => {
+        val latitude = x.getOrElse("latitude", None)
+        val longitude = x.getOrElse("longitude", None)
         StationData(
           x("free_bikes").asInstanceOf[Double].toInt,
           x("empty_slots").asInstanceOf[Double].toInt,
@@ -34,8 +36,8 @@ object StationDataTransformation {
           Instant.from(DateTimeFormatter.ISO_INSTANT.parse(x("timestamp").asInstanceOf[String])).getEpochSecond,
           x("id").asInstanceOf[String],
           x("name").asInstanceOf[String],
-          x("latitude").asInstanceOf[Option[Double]],
-          x("longitude").asInstanceOf[Option[Double]]
+          latitude.asInstanceOf[Option[Double]],
+          longitude.asInstanceOf[Option[Double]]
         )
       })
   }
