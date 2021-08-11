@@ -149,24 +149,44 @@
           },
           "name": "Le v\u00e9lo",
           "source": "https://developer.jcdecaux.com",
-          "stations": {
-            "empty_slots": 13,
-            "extra": {
-              "address": "391 MICHELET - 391 BOULEVARD MICHELET",
-              "banking": true,
-              "bonus": false,
-              "last_update": 1628665308000,
-              "slots": 19,
-              "status": "OPEN",
-              "uid": 8149
+          "stations": [
+            {
+              "empty_slots": 13,
+              "extra": {
+                "address": "391 MICHELET - 391 BOULEVARD MICHELET",
+                "banking": true,
+                "bonus": false,
+                "last_update": 1628675539000,
+                "slots": 19,
+                "status": "OPEN",
+                "uid": 8149
+              },
+              "free_bikes": 6,
+              "id": "686e48654a218c70daf950a4e893e5b0",
+              "latitude": 43.25402727813068,
+              "longitude": 5.401873594694653,
+              "name": "8149-391 MICHELET",
+              "timestamp": "2021-08-11T09:53:41.995000Z"
             },
-            "free_bikes": 6,
-            "id": "686e48654a218c70daf950a4e893e5b0",
-            "latitude": 43.25402727813068,
-            "longitude": 5.401873594694653,
-            "name": "8149-391 MICHELET",
-            "timestamp": "2021-08-11T07:08:16.126000Z"
-          }
+            {
+              "empty_slots": 12,
+              "extra": {
+                "address": "LIVON VIEUX PORT - 36 BOULEVARD CHARLES LIVON",
+                "banking": true,
+                "bonus": false,
+                "last_update": 1628675515000,
+                "slots": 15,
+                "status": "OPEN",
+                "uid": 7146
+              },
+              "free_bikes": 3,
+              "id": "fb3dee1fd2c92d5ab239c8f93eb8df99",
+              "latitude": 43.29224532184672,
+              "longitude": 5.360224853219125,
+              "name": "7146-LIVON VIEUX PORT",
+              "timestamp": "2021-08-11T09:53:42.135000Z"
+            }
+          ]
         }
       }
     }
