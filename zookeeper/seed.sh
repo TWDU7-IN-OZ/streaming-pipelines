@@ -34,4 +34,5 @@ $zk_command create /tw/stationDataFrance/dataLocation hdfs://$hdfs_server/tw/raw
 
 $zk_command create /tw/output ''
 $zk_command create /tw/output/checkpointLocation hdfs://$hdfs_server/tw/stationMart/checkpoints
+$zk_command create /tw/output/checkpointLocation1 hdfs://$hdfs_server/tw/stationMart/checkpoints1
 $zk_command create /tw/output/dataLocation hdfs://$hdfs_server/tw/stationMart/data
