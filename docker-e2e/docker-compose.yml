@@ -2,6 +2,8 @@ version: "3"
 services:
   mockServer:
     image: mockserver/mockserver:mockserver-5.11.1
+    networks:
+      - streaming-data-internal
     command: -logLevel DEBUG -serverPort 1090 -proxyRemotePort 80 -proxyRemoteHost www.mock-server.com
     ports:
       - 1080:1090
@@ -74,6 +76,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-information
+      - PRODUCER_URL=http://mockserver:1090/station_data_nyc_mock
 
   station-status-producer:
     build:
@@ -86,6 +89,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-status
+      - PRODUCER_URL=http://mockserver:1090/station_status_mock
 
   station-san-francisco-producer:
     build:
@@ -98,6 +102,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-san-francisco
+      - PRODUCER_URL=http://mockserver:1090/station_data_sf_mock
 
   station-france-producer:
     build:
@@ -110,6 +115,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-france
+      - PRODUCER_URL=http://mockserver:1090/station_data_france_mock
 
   raw-station-information-data-saver:
     build:
