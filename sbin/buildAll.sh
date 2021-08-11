@@ -8,5 +8,3 @@ echo "====Building Consumer JARs===="
 cd $DIR/../RawDataSaver && sbt test && sbt package
 cd $DIR/../StationConsumer && sbt test && sbt package
 cd $DIR/../StationTransformerNYC && sbt test && sbt package
-echo "====Building Validator JARs===="
-cd $DIR/../StationValidator && sbt test && sbt package

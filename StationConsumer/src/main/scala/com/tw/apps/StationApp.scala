@@ -28,18 +28,6 @@ object StationApp {
     val outputLocation = new String(
       zkClient.getData.watched.forPath("/tw/output/dataLocation"))
 
-    val invalidDataLocation = new String(
-      zkClient.getData.watched.forPath(s"/tw/output/invalidDataLocation"))
-
-    val invalidDataCheckpointLocation = new String(
-      zkClient.getData.watched.forPath(s"/tw/output/invalidDataCheckpointLocation"))
-
-    val validDataLocation = new String(
-      zkClient.getData.watched.forPath(s"/tw/output/validDataLocation"))
-
-    val validDataCheckpointLocation = new String(
-      zkClient.getData.watched.forPath(s"/tw/output/validDataCheckpointLocation"))
-
     implicit val spark: SparkSession = SparkSession.builder
       .appName("StationConsumer")
       .getOrCreate()
@@ -77,8 +65,8 @@ object StationApp {
       .outputMode("update")
       .option("header", value = true)
       .option("truncate", value = false)
-      .option("checkpointLocation", validDataCheckpointLocation)
-      .option("path", validDataLocation)
+      .option("checkpointLocation", checkpointLocation)
+      .option("path", outputLocation)
       .start()
       .awaitTermination()
   }

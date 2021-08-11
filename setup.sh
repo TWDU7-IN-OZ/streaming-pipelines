@@ -23,8 +23,6 @@ mkdir -p /tmp/tw/rawData/stationSanFrancisco/checkpoints
 mkdir -p /tmp/tw/rawData/stationSanFrancisco/data
 mkdir -p /tmp/tw/stationMart/checkpoints
 mkdir -p /tmp/tw/stationMart/data
-mkdir -p /tmp/tw/stationMart/invalidDataCheckpoints
-mkdir -p /tmp/tw/stationMart/invalidData
 
 
 
@@ -58,12 +56,5 @@ $zk_command create /tw/stationDataFrance/dataLocation /tmp/tw/rawData/stationDat
 $zk_command create /tw/output ''
 $zk_command create /tw/output/checkpointLocation /tmp/tw/stationMart/checkpoints
 $zk_command create /tw/output/dataLocation /tmp/tw/stationMart/data
-
-$zk_command create /tw/output/invalidDataCheckpointLocation /tmp/tw/stationMart/invalidDataCheckpoints
-$zk_command create /tw/output/invalidDataLocation /tmp/tw/stationMart/invalidData
-
-$zk_command create /tw/output/validDataCheckpointLocation /tmp/tw/stationMart/validDataCheckpoints
-$zk_command create /tw/output/validDataLocation /tmp/tw/stationMart/validData
-
 
 tail -f /dev/null
