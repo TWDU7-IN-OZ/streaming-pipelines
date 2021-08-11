@@ -53,42 +53,50 @@ services:
   station-information-producer:
     build:
       context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-station-information
+      dockerfile: Dockerfile-Producer
     depends_on:
       - kafka
       - zookeeper-seed
     networks:
       - streaming-data-internal
+    environment:
+      - PROFILE_NAME=station-information
 
   station-status-producer:
     build:
       context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-station-status
+      dockerfile: Dockerfile-Producer
     depends_on:
       - kafka
       - zookeeper-seed
     networks:
       - streaming-data-internal
+    environment:
+      - PROFILE_NAME=station-status
 
   station-san-francisco-producer:
     build:
       context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-station-san-francisco
+      dockerfile: Dockerfile-Producer
     depends_on:
       - kafka
       - zookeeper-seed
     networks:
       - streaming-data-internal
+    environment:
+      - PROFILE_NAME=station-san-francisco
 
   station-france-producer:
     build:
       context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-station-france
+      dockerfile: Dockerfile-Producer
     depends_on:
       - kafka
       - zookeeper-seed
     networks:
       - streaming-data-internal
+    environment:
+      - PROFILE_NAME=station-france
 
   raw-station-information-data-saver:
     build:
