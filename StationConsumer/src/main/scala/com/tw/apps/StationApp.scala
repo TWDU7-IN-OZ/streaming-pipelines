@@ -19,7 +19,7 @@ object StationApp {
 
     val stationKafkaBrokers = new String(zkClient.getData.forPath("/tw/stationStatus/kafkaBrokers"))
 
-    val nycStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataNYC/topic"))
+    val nycStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataNYCv2/topic"))
     val sfStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataSF/topic"))
     val franceStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataFrance/topic"))
 
@@ -44,7 +44,7 @@ object StationApp {
       .option("failOnDataLoss", false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
-      .transform(nycStationStatusJson2DF(_, spark))
+      .transform(jsonToStationDataDF(_, spark))
 
     val sfStationDF = spark.readStream
       .format("kafka")
@@ -54,7 +54,7 @@ object StationApp {
       .option("failOnDataLoss", false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
-      .transform(sfStationStatusJson2DF(_, spark))
+      .transform(jsonToStationDataDF(_, spark))
 
     val franceStationDF = spark.readStream
       .format("kafka")
@@ -74,7 +74,7 @@ object StationApp {
       .reduceGroups((r1,r2)=>if (r1.last_updated > r2.last_updated) r1 else r2)
       .map(_._2)
       .toDF()
-      .transform(formatDate(_))
+      .transform(formatDate)
       .writeStream
       .format("overwriteCSV")
       .outputMode("complete")

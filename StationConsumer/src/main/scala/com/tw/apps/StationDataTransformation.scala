@@ -69,12 +69,13 @@ object StationDataTransformation {
       })
   }
 
-  def sfStationStatusJson2DF(jsonDF: DataFrame, spark: SparkSession): DataFrame = {
+  def jsonToStationDataDF(jsonDF: DataFrame, spark: SparkSession): DataFrame = {
     val toStatusFn: UserDefinedFunction = udf(SFToStationStatus)
 
     import spark.implicits._
 
-    jsonDF.select(explode(toStatusFn(jsonDF("raw_payload"))) as "status")
+    val stations = toStatusFn(jsonDF("raw_payload"))
+    jsonDF.select(explode(stations) as "status")
       .select($"status.*")
   }
 
