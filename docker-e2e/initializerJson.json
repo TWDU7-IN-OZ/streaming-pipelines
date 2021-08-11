@@ -1,0 +1,55 @@
+[
+  {
+    "httpRequest": {
+      "path": "/station_status_mock"
+    },
+    "httpResponse": {
+      "body": {
+        "data":{
+          "stations":[
+            {
+              "num_bikes_disabled":4,
+              "station_id":"72",
+              "station_status":"active",
+              "is_renting":1,
+              "is_installed":1,
+              "is_returning":1,
+              "eightd_has_available_keys":false,
+              "num_bikes_available":50,
+              "last_reported":1628661923,
+              "num_docks_disabled":0,
+              "legacy_id":"72",
+              "num_ebikes_available":2,
+              "num_docks_available":1
+            },
+            {
+              "num_bikes_disabled":1,
+              "station_id":"79",
+              "station_status":"active",
+              "is_renting":1,
+              "is_installed":1,
+              "is_returning":1,
+              "eightd_has_available_keys":false,
+              "num_bikes_available":20,
+              "last_reported":1628661924,
+              "num_docks_disabled":0,
+              "legacy_id":"79",
+              "num_ebikes_available":1,
+              "num_docks_available":12
+            }
+          ]
+        },
+        "last_updated":1628662780,
+        "ttl":5
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/secondExampleExpectation"
+    },
+    "httpResponse": {
+      "body": "some response"
+    }
+  }
+]
