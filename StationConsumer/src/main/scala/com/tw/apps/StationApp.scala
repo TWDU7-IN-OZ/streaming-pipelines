@@ -24,7 +24,7 @@ object StationApp {
     val franceStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataFrance/topic"))
 
     val checkpointLocation = new String(
-      zkClient.getData.watched.forPath("/tw/output/checkpointLocation"))
+      zkClient.getData.watched.forPath("/tw/output/checkpointLocation1"))
 
     val outputLocation = new String(
       zkClient.getData.watched.forPath("/tw/output/dataLocation"))
