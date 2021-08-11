@@ -34,8 +34,8 @@ object StationDataTransformation {
           Instant.from(DateTimeFormatter.ISO_INSTANT.parse(x("timestamp").asInstanceOf[String])).getEpochSecond,
           x("id").asInstanceOf[String],
           x("name").asInstanceOf[String],
-          x("latitude").asInstanceOf[Double],
-          x("longitude").asInstanceOf[Double]
+          x("latitude").asInstanceOf[Option[Double]],
+          x("longitude").asInstanceOf[Option[Double]]
         )
       })
   }

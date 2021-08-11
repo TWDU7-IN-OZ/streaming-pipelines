@@ -95,7 +95,7 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
       row1.get(1) should be("2018-09-06T02:02:07")
     }
 
-    scenario("reduce valid data") {
+    scenario("reduce valid data with is_valid true") {
       val testStationData =
         """{
           "station_id":"83",
@@ -128,11 +128,7 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
         .withColumn("docks_available", col("docks_available").cast(IntegerType))
         .as[StationData]
 
-      val expectedData: Dataset[ValidatedStationData] = spark.read.json(Seq(testStationData1).toDS())
-        .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
-        .withColumn("docks_available", col("docks_available").cast(IntegerType))
-        .withColumn("is_valid", lit(true))
-        .as[ValidatedStationData]
+      val expectedData = buildExpectedDataSet(spark, testStationData1, isValid = true).as[ValidatedStationData]
 
       val validatedData: Dataset[ValidatedStationData] = StationDataTransformation.validateAndReduce(testDF1)
       validatedData.collect().length should be(1)
@@ -140,7 +136,7 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
       expectedData.head() shouldBe validatedData.head()
     }
 
-    scenario("do not reduce invalid data") {
+    scenario("reduce invalid data with is_valid false") {
 
       val validtestStationData1 =
         """{
@@ -178,7 +174,6 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
           |"is_returning":true,
           |"last_updated":1536242530,
           |"name":"Atlantic Ave & Fort Greene Pl",
-          |"latitude":40.68382604,
           |"longitude":-73.97632328
           |}
         """.stripMargin
@@ -189,17 +184,21 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
         .as[StationData]
 
 
-//      val expectedData: Dataset[ValidatedStationData] = spark.read.json(Seq(testStationData1).toDS())
-//        .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
-//        .withColumn("docks_available", col("docks_available").cast(IntegerType))
-//        .withColumn("is_valid", lit(true))
-//        .as[ValidatedStationData]
+      val expectedData = buildExpectedDataSet(spark, validtestStationData1, isValid = true)
+        .unionByName(buildExpectedDataSet(spark, invalidtestStationData2, isValid = false).withColumn("latitude", lit(null)))
+        .as[ValidatedStationData]
+
 
       val validatedData: Dataset[ValidatedStationData] = StationDataTransformation.validateAndReduce(testDF1)
-      validatedData.show(false)
-//      validatedData.collect().length should be(1)
-//
-//      expectedData.head() shouldBe validatedData.head()
+      expectedData.collect() should contain theSameElementsAs validatedData.collect()
     }
+  }
+
+  private def buildExpectedDataSet(spark: SparkSession, dataSet: String, isValid: Boolean) = {
+    import spark.implicits._
+    spark.read.json(Seq(dataSet).toDS())
+      .withColumn("bikes_available", col("bikes_available").cast(IntegerType))
+      .withColumn("docks_available", col("docks_available").cast(IntegerType))
+      .withColumn("is_valid", lit(isValid))
   }
 }
