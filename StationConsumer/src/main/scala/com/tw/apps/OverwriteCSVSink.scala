@@ -28,7 +28,7 @@ class OverwriteCSVSink(sqlContext: SQLContext,
       .option("truncate", parameters.get("truncate").orNull)
       .option("checkpointLocation", parameters.get("checkpointLocation").orNull)
       .option("path", parameters.get("path").orNull)
-      .insertInto("station_mart");
+      .save()
   }
 }
 
