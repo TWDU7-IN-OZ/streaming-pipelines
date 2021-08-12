@@ -65,32 +65,6 @@ services:
     depends_on:
       - zookeeper
 
-  station-information-producer:
-    build:
-      context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-Producer
-    depends_on:
-      - kafka
-      - zookeeper-seed
-    networks:
-      - streaming-data-internal
-    environment:
-      - PROFILE_NAME=station-information
-      - PRODUCER_URL=http://mockserver:1090/station_data_nyc_mock
-
-  station-status-producer:
-    build:
-      context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-Producer
-    depends_on:
-      - kafka
-      - zookeeper-seed
-    networks:
-      - streaming-data-internal
-    environment:
-      - PROFILE_NAME=station-status
-      - PRODUCER_URL=http://mockserver:1090/station_status_mock
-
   station-san-francisco-producer:
     build:
       context: ../CitibikeApiProducer
@@ -116,40 +90,6 @@ services:
     environment:
       - PROFILE_NAME=station-france
       - PRODUCER_URL=http://mockserver:1090/station_data_france_mock
-
-  raw-station-information-data-saver:
-    build:
-      context: ../RawDataSaver
-      dockerfile: Dockerfile-station-information
-    depends_on:
-      - kafka
-      - station-information-producer
-      - station-status-producer
-      - station-san-francisco-producer
-      - hadoop-seed
-      - zookeeper-seed
-    volumes:
-      - ~/.ivy2:/root/.ivy2:rw
-    networks:
-      - streaming-data-internal
-    restart: on-failure
-
-  raw-station-status-data-saver:
-    build:
-      context: ../RawDataSaver
-      dockerfile: Dockerfile-station-status
-    depends_on:
-      - kafka
-      - station-information-producer
-      - station-status-producer
-      - station-san-francisco-producer
-      - hadoop-seed
-      - zookeeper-seed
-    volumes:
-      - ~/.ivy2:/root/.ivy2:rw
-    networks:
-      - streaming-data-internal
-    restart: on-failure
 
   raw-station-data-france-saver:
     build:

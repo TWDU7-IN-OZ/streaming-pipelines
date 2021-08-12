@@ -2,17 +2,11 @@
 
 set -e
 
-$hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationInformation/checkpoints \
-&& $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationInformation/data \
-&& $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationStatus/checkpoints \
-&& $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationStatus/data \
-&& $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataSF/checkpoints \
+$hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataSF/checkpoints \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataSF/data \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataFrance/checkpoints \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataFrance/data \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataNYCv2/checkpoints \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataNYCv2/data \
-&& $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/rawData/stationDataNYC/checkpoints \
-&& $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/stationMart/checkpoints \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/stationMart/checkpoints_v2 \
 && $hadoop_path fs -fs hdfs://$hdfs_server -mkdir -p /tw/stationMart/data
