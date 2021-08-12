@@ -132,8 +132,6 @@ services:
       dockerfile: Dockerfile-station-status
     depends_on:
       - kafka
-      - station-information-producer
-      - station-status-producer
       - station-san-francisco-producer
       - hadoop-seed
       - zookeeper-seed
@@ -149,8 +147,6 @@ services:
       dockerfile: Dockerfile-station-data-France
     depends_on:
       - kafka
-      - station-information-producer
-      - station-status-producer
       - station-france-producer
       - hadoop-seed
       - zookeeper-seed
@@ -166,8 +162,6 @@ services:
       dockerfile: Dockerfile-station-data-nyc-v2
     depends_on:
       - kafka
-      - station-information-producer
-      - station-status-producer
       - station-nyc-producer
       - hadoop-seed
       - zookeeper-seed
@@ -183,9 +177,8 @@ services:
     depends_on:
       - zookeeper-seed
       - kafka
-      - station-status-producer
-      - station-san-francisco-producer
       - raw-station-status-data-saver
+      - station-nyc-producer
     volumes:
       - ~/.ivy2:/root/.ivy2:rw
     command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
@@ -210,21 +203,21 @@ services:
       - streaming-data-internal
     restart: on-failure
 
-  station-transformer-nyc:
-    build:
-      context: ../StationTransformerNYC
-    depends_on:
-      - zookeeper-seed
-      - hadoop-seed
-      - kafka
-      - station-status-producer
-      - station-information-producer
-    volumes:
-      - ~/.ivy2:/root/.ivy2:rw
-    command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
-    networks:
-      - streaming-data-internal
-    restart: on-failure
+#  station-transformer-nyc:
+#    build:
+#      context: ../StationTransformerNYC
+#    depends_on:
+#      - zookeeper-seed
+#      - hadoop-seed
+#      - kafka
+#      - station-status-producer
+#      - station-information-producer
+#    volumes:
+#      - ~/.ivy2:/root/.ivy2:rw
+#    command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
+#    networks:
+#      - streaming-data-internal
+#    restart: on-failure
 
 networks:
   streaming-data-internal:
