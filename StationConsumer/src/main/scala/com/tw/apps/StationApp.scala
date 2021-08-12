@@ -17,7 +17,7 @@ object StationApp {
 
     zkClient.start()
 
-    val stationKafkaBrokers = new String(zkClient.getData.forPath("/tw/stationStatus/kafkaBrokers"))
+    val kafkaBrokers = new String(zkClient.getData.forPath("/tw/stationDataNYCv2/kafkaBrokers"))
 
     val nycStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataNYCv2/topic"))
     val sfStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataSF/topic"))
@@ -38,7 +38,7 @@ object StationApp {
 
     val nycStationDF = spark.readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", stationKafkaBrokers)
+      .option("kafka.bootstrap.servers", kafkaBrokers)
       .option("subscribe", nycStationTopic)
       .option("startingOffsets", "latest")
       .option("failOnDataLoss", false)
@@ -48,7 +48,7 @@ object StationApp {
 
     val sfStationDF = spark.readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", stationKafkaBrokers)
+      .option("kafka.bootstrap.servers", kafkaBrokers)
       .option("subscribe", sfStationTopic)
       .option("startingOffsets", "latest")
       .option("failOnDataLoss", false)
@@ -58,7 +58,7 @@ object StationApp {
 
     val franceStationDF = spark.readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", stationKafkaBrokers)
+      .option("kafka.bootstrap.servers", kafkaBrokers)
       .option("subscribe", franceStationTopic)
       .option("startingOffsets", "latest")
       .option("failOnDataLoss", false)
