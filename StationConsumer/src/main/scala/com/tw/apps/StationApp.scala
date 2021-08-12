@@ -32,11 +32,7 @@ object StationApp {
     val spark = SparkSession.builder
       .appName("StationConsumer")
       .getOrCreate()
-
     spark.conf.set("spark.sql.session.timeZone", "UTC");
-    spark.conf.set("spark.sql.sources.partitionOverwriteMode","dynamic")
-    spark.conf.set("hive.exec.dynamic.partition.mode", "nonstrict")
-    spark.conf.set("hive.exec.dynamic.partition", "true")
 
     import spark.implicits._
 
