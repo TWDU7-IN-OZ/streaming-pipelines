@@ -1,6 +1,6 @@
 package com.tw.apps
 
-import com.tw.apps.StationDataTransformation._
+import StationDataTransformation._
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.spark.sql.SparkSession
@@ -19,8 +19,9 @@ object StationApp {
 
     val stationKafkaBrokers = new String(zkClient.getData.forPath("/tw/stationStatus/kafkaBrokers"))
 
-    val nycStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataNYC/topic"))
+    val nycStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataNYCv2/topic"))
     val sfStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataSF/topic"))
+    val franceStationTopic = new String(zkClient.getData.watched.forPath("/tw/stationDataFrance/topic"))
 
     val checkpointLocation = new String(
       zkClient.getData.watched.forPath("/tw/output/checkpointLocation"))
@@ -43,7 +44,7 @@ object StationApp {
       .option("failOnDataLoss", value = false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
-      .transform(nycStationStatusJson2DF(_, spark))
+      .transform(jsonToStationDataDF(_, spark))
 
     val sfStationDF = spark.readStream
       .format("kafka")
@@ -53,9 +54,19 @@ object StationApp {
       .option("failOnDataLoss", value = false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
-      .transform(sfStationStatusJson2DF(_, spark))
+      .transform(jsonToStationDataDF(_, spark))
 
-    val rawStationData = nycStationDF.union(sfStationDF).as[StationData]
+    val franceStationDF = spark.readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", stationKafkaBrokers)
+      .option("subscribe", franceStationTopic)
+      .option("startingOffsets", "latest")
+      .option("failOnDataLoss", false)
+      .load()
+      .selectExpr("CAST(value AS STRING) as raw_payload")
+      .transform(franceStationStatusJson2DF(_, spark))
+
+    val rawStationData = nycStationDF.union(sfStationDF).union(franceStationDF).as[StationData]
 
     validateAndReduce(rawStationData)
       .toDF()

@@ -13,15 +13,13 @@ class OverwriteCSVSink(sqlContext: SQLContext,
                        outputMode: OutputMode) extends Sink {
 
   override def addBatch(batchId: Long, data: DataFrame): Unit = {
-    import sqlContext.implicits._
-    val lastUpdatedColumnName = 'last_updated
     data.sparkSession.createDataFrame(
       data.sparkSession.sparkContext.parallelize(data.collect()), data.schema)
       .repartition(1)
-      .withColumn("year", year(lastUpdatedColumnName))
-      .withColumn("month", lpad(month(lastUpdatedColumnName), 2, "0"))
-      .withColumn("day", lpad(dayofmonth(lastUpdatedColumnName), 2, "0"))
-      .withColumn("hour", lpad(hour(lastUpdatedColumnName), 2, "0"))
+      .withColumn("year", year(current_date))
+      .withColumn("month", lpad(month(current_date), 2, "0"))
+      .withColumn("day", lpad(dayofmonth(current_date), 2, "0"))
+      .withColumn("hour", lpad(hour(current_timestamp), 2, "0"))
       .write
       .partitionBy("year", "month", "day", "hour")
       .mode(SaveMode.Append)

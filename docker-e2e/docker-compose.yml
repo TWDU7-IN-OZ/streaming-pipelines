@@ -1,5 +1,20 @@
 version: "3"
 services:
+  mockServer:
+    image: mockserver/mockserver:mockserver-5.11.1
+    networks:
+      - streaming-data-internal
+    command: -logLevel DEBUG -serverPort 1090 -proxyRemotePort 80 -proxyRemoteHost www.mock-server.com
+    ports:
+      - 1080:1090
+    environment:
+      MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/initializerJson.json
+    volumes:
+      - type: bind
+        source: .
+        target: /config
+
   kafka:
     image: wurstmeister/kafka:0.10.0.1-2
     networks:
@@ -61,6 +76,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-information
+      - PRODUCER_URL=http://mockserver:1090/station_data_nyc_mock
 
   station-status-producer:
     build:
@@ -73,6 +89,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-status
+      - PRODUCER_URL=http://mockserver:1090/station_status_mock
 
   station-san-francisco-producer:
     build:
@@ -85,6 +102,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-san-francisco
+      - PRODUCER_URL=http://mockserver:1090/station_data_sf_mock
 
   station-france-producer:
     build:
@@ -97,17 +115,7 @@ services:
       - streaming-data-internal
     environment:
       - PROFILE_NAME=station-france
-
-  station-nyc-producer:
-    build:
-      context: ../CitibikeApiProducer
-      dockerfile: Dockerfile-station-nyc-v2
-    depends_on:
-      - kafka
-      - zookeeper-seed
-    networks:
-      - streaming-data-internal
-    restart: on-failure
+      - PRODUCER_URL=http://mockserver:1090/station_data_france_mock
 
   raw-station-information-data-saver:
     build:
@@ -132,6 +140,8 @@ services:
       dockerfile: Dockerfile-station-status
     depends_on:
       - kafka
+      - station-information-producer
+      - station-status-producer
       - station-san-francisco-producer
       - hadoop-seed
       - zookeeper-seed
@@ -147,22 +157,9 @@ services:
       dockerfile: Dockerfile-station-data-France
     depends_on:
       - kafka
+      - station-information-producer
+      - station-status-producer
       - station-france-producer
-      - hadoop-seed
-      - zookeeper-seed
-    volumes:
-      - ~/.ivy2:/root/.ivy2:rw
-    networks:
-      - streaming-data-internal
-    restart: on-failure
-
-  raw-station-data-nyc-saver:
-    build:
-      context: ../RawDataSaver
-      dockerfile: Dockerfile-station-data-nyc-v2
-    depends_on:
-      - kafka
-      - station-nyc-producer
       - hadoop-seed
       - zookeeper-seed
     volumes:
@@ -177,8 +174,9 @@ services:
     depends_on:
       - zookeeper-seed
       - kafka
+      - station-status-producer
+      - station-san-francisco-producer
       - raw-station-status-data-saver
-      - station-nyc-producer
     volumes:
       - ~/.ivy2:/root/.ivy2:rw
     command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
@@ -203,21 +201,21 @@ services:
       - streaming-data-internal
     restart: on-failure
 
-#  station-transformer-nyc:
-#    build:
-#      context: ../StationTransformerNYC
-#    depends_on:
-#      - zookeeper-seed
-#      - hadoop-seed
-#      - kafka
-#      - station-status-producer
-#      - station-information-producer
-#    volumes:
-#      - ~/.ivy2:/root/.ivy2:rw
-#    command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
-#    networks:
-#      - streaming-data-internal
-#    restart: on-failure
+  station-transformer-nyc:
+    build:
+      context: ../StationTransformerNYC
+    depends_on:
+      - zookeeper-seed
+      - hadoop-seed
+      - kafka
+      - station-status-producer
+      - station-information-producer
+    volumes:
+      - ~/.ivy2:/root/.ivy2:rw
+    command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
+    networks:
+      - streaming-data-internal
+    restart: on-failure
 
 networks:
   streaming-data-internal:
