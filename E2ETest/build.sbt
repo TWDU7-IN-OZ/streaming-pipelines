@@ -9,10 +9,10 @@ lazy val root = (project in file(".")).
       version := "0.0.1"
     )),
 
-    name := "tw-station-consumer",
+    name := "end-to-end-test",
 
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-      "org.apache.hadoop" % "hadoop-common" % "3.3.1"
+      "org.apache.hadoop" % "hadoop-client" % "3.3.1"
     )
   )

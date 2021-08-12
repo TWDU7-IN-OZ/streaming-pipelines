@@ -11,14 +11,10 @@ class StationMartTest extends FeatureSpec with Matchers with GivenWhenThen {
   feature("Apply station status transformations to data frame") {
 
     scenario("Transform nyc station data frame") {
-      val hdfs = FileSystem.get(new URI("hdfs://yourUrl:port/"), new Configuration())
-      val path = new Path("/path/to/file/")
-      val stream = hdfs.open(path)
-      def readLines = Stream.cons(stream.readLine, Stream.continually( stream.readLine))
+      val hdfs = FileSystem.get(new URI("hdfs://localhost:9000"), new Configuration())
+      val path = new Path("/tw/stationMart/data/year=2021/month=08/day=12/hour=09/part-00000-01f3b100-d6ef-47e8-9cad-9ef28317e8d4.c000.csv")
 
-      readLines.takeWhile(_ != null).foreach(line => println(line))
-
-      "1" should be("1")
+      hdfs.exists(path) should be(true)
     }
   }
 }
