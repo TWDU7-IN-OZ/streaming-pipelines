@@ -97,8 +97,6 @@ services:
       dockerfile: Dockerfile-station-data-France
     depends_on:
       - kafka
-      - station-information-producer
-      - station-status-producer
       - station-france-producer
       - hadoop-seed
       - zookeeper-seed
@@ -114,9 +112,7 @@ services:
     depends_on:
       - zookeeper-seed
       - kafka
-      - station-status-producer
       - station-san-francisco-producer
-      - raw-station-status-data-saver
     volumes:
       - ~/.ivy2:/root/.ivy2:rw
     command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]
@@ -130,8 +126,6 @@ services:
       dockerfile: Dockerfile-station-data-SF
     depends_on:
       - kafka
-      - station-information-producer
-      - station-status-producer
       - station-san-francisco-producer
       - hadoop-seed
       - zookeeper-seed
@@ -148,8 +142,6 @@ services:
       - zookeeper-seed
       - hadoop-seed
       - kafka
-      - station-status-producer
-      - station-information-producer
     volumes:
       - ~/.ivy2:/root/.ivy2:rw
     command: [ "./wait-for.sh", "zookeeper:2181", "-t", "30" ]

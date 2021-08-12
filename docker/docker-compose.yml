@@ -139,8 +139,6 @@ services:
       dockerfile: Dockerfile-station-data-SF
     depends_on:
       - kafka
-      - station-information-producer
-      - station-status-producer
       - station-san-francisco-producer
       - hadoop-seed
       - zookeeper-seed
