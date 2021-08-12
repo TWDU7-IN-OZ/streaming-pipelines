@@ -136,7 +136,7 @@ class StationDataTransformationTest extends FeatureSpec with Matchers with Given
       row1.get(4) should be(1602190953)
       row1.get(5) should be("d0e8f4f1834b7b33a3faf8882f567ab8")
       row1.get(6) should be("Harmon St at Adeline St")
-      row1.get(7) should be null
+      row1.get(7) should be
       row1.get(8) should be(-122.270582)
     }
 

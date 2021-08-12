@@ -26,8 +26,14 @@ object StationDataTransformation {
 
     stations.asInstanceOf[Seq[Map[String, Any]]]
       .map(x => {
-        val latitude = x.getOrElse("latitude", None)
-        val longitude = x.getOrElse("longitude", None)
+        var latitude = x.getOrElse("latitude", None)
+        var longitude = x.getOrElse("longitude", None)
+        if(latitude != None) {
+          latitude = x.get("latitude")
+        }
+        if(longitude != None) {
+          longitude = x.get("longitude")
+        }
         StationData(
           x("free_bikes").asInstanceOf[Double].toInt,
           x("empty_slots").asInstanceOf[Double].toInt,
