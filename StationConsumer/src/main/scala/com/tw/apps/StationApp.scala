@@ -29,10 +29,10 @@ object StationApp {
     val outputLocation = new String(
       zkClient.getData.watched.forPath("/tw/output/dataLocation"))
 
-    val spark = SparkSession.builder
+    implicit val spark: SparkSession = SparkSession.builder
       .appName("StationConsumer")
       .getOrCreate()
-    spark.conf.set("spark.sql.session.timeZone", "UTC");
+    spark.conf.set("spark.sql.session.timeZone", "UTC")
 
     import spark.implicits._
 
@@ -41,7 +41,7 @@ object StationApp {
       .option("kafka.bootstrap.servers", kafkaBrokers)
       .option("subscribe", nycStationTopic)
       .option("startingOffsets", "latest")
-      .option("failOnDataLoss", false)
+      .option("failOnDataLoss", value = false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
       .transform(jsonToStationDataDF(_, spark))
@@ -51,7 +51,7 @@ object StationApp {
       .option("kafka.bootstrap.servers", kafkaBrokers)
       .option("subscribe", sfStationTopic)
       .option("startingOffsets", "latest")
-      .option("failOnDataLoss", false)
+      .option("failOnDataLoss", value = false)
       .load()
       .selectExpr("CAST(value AS STRING) as raw_payload")
       .transform(jsonToStationDataDF(_, spark))
@@ -66,24 +66,19 @@ object StationApp {
       .selectExpr("CAST(value AS STRING) as raw_payload")
       .transform(franceStationStatusJson2DF(_, spark))
 
-    nycStationDF
-      .union(sfStationDF)
-      .union(franceStationDF)
-      .as[StationData]
-      .groupByKey(r=>r.station_id)
-      .reduceGroups((r1,r2)=>if (r1.last_updated > r2.last_updated) r1 else r2)
-      .map(_._2)
+    val rawStationData = nycStationDF.union(sfStationDF).union(franceStationDF).as[StationData]
+
+    validateAndReduce(rawStationData)
       .toDF()
       .transform(formatDate)
       .writeStream
       .format("overwriteCSV")
-      .outputMode("complete")
-      .option("header", true)
-      .option("truncate", false)
+      .outputMode("update")
+      .option("header", value = true)
+      .option("truncate", value = false)
       .option("checkpointLocation", checkpointLocation)
       .option("path", outputLocation)
       .start()
       .awaitTermination()
-
   }
 }

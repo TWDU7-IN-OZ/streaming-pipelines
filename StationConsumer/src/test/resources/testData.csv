@@ -1,0 +1,4 @@
+bikes_available,docks_available,is_renting,is_returning,last_updated,station_id,name,latitude,longitude
+5,5,true,true,1627966585,1,55 Sydney St,50.5,-88
+10,8,true,true,1627966585,2,1 Ave & 2 St,50.78654,-88.564
+20,4,true,true,1602190954,7a10659bcb8e88d97a98531df0dcd2be,A St & B St,24.2465,-45.444
